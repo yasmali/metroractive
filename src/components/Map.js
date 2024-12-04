@@ -6,6 +6,7 @@ import {
   useLoadScript,
 } from "@react-google-maps/api";
 import trainIcon from "../assets/train.png";
+import StationPanel from "./StationPanel";
 
 // Harita stil ayarları
 const mapContainerStyle = {
@@ -52,19 +53,19 @@ const metroLines = [
         name: "M1B Hattı",
         color: "#e72419",
         stations: [
-          { id: 1, name: "Yenikapı", location: { lat: 41.00557755694778, lng: 28.950457563563546 } },
-          { id: 2, name: "Aksaray", location: { lat: 41.01207799449946, lng: 28.94815235769824 } },
-          { id: 3, name: "Emniyet-Fatih", location: { lat: 41.01786033824504, lng: 28.93918062825805 } },
-          { id: 4, name: "Topkapı-Ulubatlı", location: { lat: 41.02472287530622, lng: 28.93018681223749 } },
-          { id: 5, name: "Bayrampaşa - Maltepe", location: { lat: 41.03436259003804, lng: 28.92140057669758 } },
-          { id: 6, name: "Sağmalcılar", location: { lat: 41.041122697635736, lng: 28.9074375129944 } },
-          { id: 7, name: "Kocatepe", location: { lat: 41.048496211637314, lng: 28.895543112963935 } },
-          { id: 8, name: "Otogar", location: { lat: 41.04024561976906, lng: 28.89452945263826 } },
-          { id: 9, name: "Esenler", location: { lat: 41.03765397073063, lng: 28.88855430913355 } },
-          { id: 10, name: "Menderes", location: { lat: 41.0428518039887, lng: 28.878636276716435 } },
-          { id: 11, name: "Üçyüzlü", location: { lat: 41.03657503697282, lng: 28.87062608907891 } },
-          { id: 12, name: "Bağcılar Meydan", location: { lat: 41.03470656200058, lng: 28.856407024201 } },
-          { id: 13, name: "Kirazlı-Bağcılar", location: { lat: 41.03220179623386, lng: 28.842883877488486 } },
+          { id: 9, name: "Yenikapı", location: { lat: 41.00557755694778, lng: 28.950457563563546 } },
+          { id: 20, name: "Aksaray", location: { lat: 41.01207799449946, lng: 28.94815235769824 } },
+          { id: 21, name: "Emniyet-Fatih", location: { lat: 41.01786033824504, lng: 28.93918062825805 } },
+          { id: 22, name: "Topkapı-Ulubatlı", location: { lat: 41.02472287530622, lng: 28.93018681223749 } },
+          { id: 23, name: "Bayrampaşa - Maltepe", location: { lat: 41.03436259003804, lng: 28.92140057669758 } },
+          { id: 24, name: "Sağmalcılar", location: { lat: 41.041122697635736, lng: 28.9074375129944 } },
+          { id: 25, name: "Kocatepe", location: { lat: 41.048496211637314, lng: 28.895543112963935 } },
+          { id: 26, name: "Otogar", location: { lat: 41.04024561976906, lng: 28.89452945263826 } },
+          { id: 27, name: "Esenler", location: { lat: 41.03765397073063, lng: 28.88855430913355 } },
+          { id: 28, name: "Menderes", location: { lat: 41.0428518039887, lng: 28.878636276716435 } },
+          { id: 29, name: "Üçyüzlü", location: { lat: 41.03657503697282, lng: 28.87062608907891 } },
+          { id: 30, name: "Bağcılar Meydan", location: { lat: 41.03470656200058, lng: 28.856407024201 } },
+          { id: 31, name: "Kirazlı-Bağcılar", location: { lat: 41.03220179623386, lng: 28.842883877488486 } },
         ],
       },
   {
@@ -72,22 +73,22 @@ const metroLines = [
     name: "M2 Hattı",
     color: "#009944",
     stations: [
-      { id: 1, name: "Yenikapı", location: { lat: 41.00557755694778, lng: 28.950457563563546 } },
-      { id: 2, name: "Vezneciler - İstanbul Üniversitesi", location: { lat: 41.01250175063931, lng: 28.959629568128946 } },
-      { id: 3, name: "Haliç", location: { lat: 41.023000597582715, lng: 28.96672176052353 } },
-      { id: 4, name: "Şişhane", location: { lat: 41.0283537695122, lng: 28.972951108638327 } },
-      { id: 5, name: "Taksim", location: { lat: 41.03701843550389, lng: 28.98576738358649 } },
-      { id: 6, name: "Osmanbey", location: { lat: 41.05307578745314, lng: 28.987476848823874 } },
-      { id: 7, name: "Şişli-Mecidiyeköy", location: { lat: 41.064655177627216, lng: 28.99272945136874 } },
-      { id: 8, name: "Gayrettepe", location: { lat: 41.069272129217936, lng: 29.011439886906075 } },
-      { id: 9, name: "Levent", location: { lat: 41.07583868512707, lng: 29.01435110229876 } },
-      { id: 10, name: "4. Levent", location: { lat: 41.08610924396391, lng: 29.00703785678138 } },
-      { id: 11, name: "Sanayi Mahallesi", location: { lat: 41.094387527883406, lng: 29.005146736207966 } },
-      { id: 12, name: "Seyrantepe", location: { lat: 41.101116545756796, lng: 28.99552464310417 } },
-      { id: 13, name: "İTÜ-Ayazağa", location: { lat: 41.10837043366006, lng: 29.021223477275825 } },
-      { id: 14, name: "Atatürk Oto Sanayi", location: { lat: 41.118693162089144, lng: 29.024587026893094 } },
-      { id: 15, name: "Darüşşafaka", location: { lat: 41.12921786526191, lng: 29.02538481888793 } },
-      { id: 16, name: "Hacıosman", location: { lat: 41.13992845190866, lng: 29.030714704177818 } },
+      { id: 32, name: "Yenikapı", location: { lat: 41.00557755694778, lng: 28.950457563563546 } },
+      { id: 33, name: "Vezneciler - İstanbul Üniversitesi", location: { lat: 41.01250175063931, lng: 28.959629568128946 } },
+      { id: 34, name: "Haliç", location: { lat: 41.023000597582715, lng: 28.96672176052353 } },
+      { id: 35, name: "Şişhane", location: { lat: 41.0283537695122, lng: 28.972951108638327 } },
+      { id: 36, name: "Taksim", location: { lat: 41.03701843550389, lng: 28.98576738358649 } },
+      { id: 37, name: "Osmanbey", location: { lat: 41.05307578745314, lng: 28.987476848823874 } },
+      { id: 38, name: "Şişli-Mecidiyeköy", location: { lat: 41.064655177627216, lng: 28.99272945136874 } },
+      { id: 39, name: "Gayrettepe", location: { lat: 41.069272129217936, lng: 29.011439886906075 } },
+      { id: 40, name: "Levent", location: { lat: 41.07583868512707, lng: 29.01435110229876 } },
+      { id: 41, name: "4. Levent", location: { lat: 41.08610924396391, lng: 29.00703785678138 } },
+      { id: 42, name: "Sanayi Mahallesi", location: { lat: 41.094387527883406, lng: 29.005146736207966 } },
+      { id: 43, name: "Seyrantepe", location: { lat: 41.101116545756796, lng: 28.99552464310417 } },
+      { id: 44, name: "İTÜ-Ayazağa", location: { lat: 41.10837043366006, lng: 29.021223477275825 } },
+      { id: 45, name: "Atatürk Oto Sanayi", location: { lat: 41.118693162089144, lng: 29.024587026893094 } },
+      { id: 46, name: "Darüşşafaka", location: { lat: 41.12921786526191, lng: 29.02538481888793 } },
+      { id: 47, name: "Hacıosman", location: { lat: 41.13992845190866, lng: 29.030714704177818 } },
     ],
   },
   {
@@ -95,9 +96,9 @@ const metroLines = [
     name: "M2 Hattı",
     color: "#00a8e2",
     stations: [
-      { id: 4, name: "Üsküdar", location: { lat: 41.0258, lng: 29.0150 } },
-      { id: 5, name: "Kadıköy", location: { lat: 40.9917, lng: 29.0258 } },
-      { id: 6, name: "Bostancı", location: { lat: 40.9575, lng: 29.0971 } },
+      { id: 48, name: "Üsküdar", location: { lat: 41.0258, lng: 29.0150 } },
+      { id: 49, name: "Kadıköy", location: { lat: 40.9917, lng: 29.0258 } },
+      { id: 50, name: "Bostancı", location: { lat: 40.9575, lng: 29.0971 } },
     ],
   },
 ];
@@ -306,37 +307,61 @@ export default function Map({ selectedLine, setSelectedLine }) {
       .map((line) => line.name); // Hattın adını döndürür
   };
 
-  const fetchNearbyPlaces = (location) => {
+  const fetchNearbyPlaces = async (location, categories) => {
+    if (categories.length === 0) {
+      setNearbyPlaces([]); // Eğer kategori seçilmezse temizle
+      return;
+    }
+  
     const service = new window.google.maps.places.PlacesService(mapRef.current);
   
-    const request = {
-      location,
-      radius: 1000,
-      type: ["restaurant", "cafe", "museum", "hospital", "park"],
-    };
+    try {
+      const allResults = await Promise.all(
+        categories.map(async (type) => {
+          const request = {
+            location,
+            radius: 1000,
+            type, // Tek bir type gönderilir
+          };
   
-    service.nearbySearch(request, (results, status) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-        const updatedResults = results.map((place) => {
-          const distance = calculateDistance(
-            location.lat,
-            location.lng,
-            place.geometry.location.lat(),
-            place.geometry.location.lng()
-          );
-          return { ...place, distance };
-        });
+          return new Promise((resolve, reject) => {
+            service.nearbySearch(request, (results, status) => {
+              if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+                resolve(results);
+              } else {
+                resolve([]); // Hata durumunda boş array döndür
+              }
+            });
+          });
+        })
+      );
   
-        // Mesafeye göre sıralama
-        updatedResults.sort((a, b) => a.distance - b.distance);
+      // Gelen tüm sonuçları birleştir ve tekrarlananları kaldır
+      const mergedResults = allResults.flat();
+      const uniqueResults = Array.from(
+        new Set(mergedResults.map((place) => place.place_id))
+      ).map((id) => mergedResults.find((place) => place.place_id === id));
   
-        setNearbyPlaces(updatedResults);
-      } else {
-        setNearbyPlaces([]);
-      }
-    });
+      // Mesafeleri hesapla ve sıralama yap
+      const updatedResults = uniqueResults.map((place) => ({
+        ...place,
+        distance: calculateDistance(
+          location.lat,
+          location.lng,
+          place.geometry.location.lat(),
+          place.geometry.location.lng()
+        ),
+      }));
+  
+      updatedResults.sort((a, b) => a.distance - b.distance); // Mesafeye göre sıralama
+  
+      setNearbyPlaces(updatedResults);
+    } catch (error) {
+      console.error("API isteği sırasında bir hata oluştu:", error);
+      setNearbyPlaces([]);
+    }
   };
-
+  
   const calculateDistance = (lat1, lng1, lat2, lng2) => {
     const toRad = (value) => (value * Math.PI) / 180;
     const R = 6371; // Radius of Earth in km
@@ -358,101 +383,12 @@ export default function Map({ selectedLine, setSelectedLine }) {
   return (
     <div style={{ position: "relative" }}>
       {/* Sol üstteki panel */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20px",
-          left: "20px",
-          width: "300px",
-          padding: "20px",
-          backgroundColor: "white",
-          borderRadius: "10px",
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-          zIndex: 1,
-        }}
-      >
-        {selectedStation ? (
-          <div>
-            <div
-  style={{
-    display: "flex",
-    alignItems: "center", // Yatayda hizalama
-    gap: "10px", // Durak ismi ve buton arasında boşluk
-  }}
->
-  <h3
-    style={{
-      margin: "0",
-      fontSize: "18px",
-      color: "#333",
-    }}
-  >
-    {selectedStation.name} Durağı
-  </h3>
-  <a
-    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedStation.location.lat},${selectedStation.location.lng}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    style={{
-      textDecoration: "none",
-      padding: "5px 10px",
-      backgroundColor: "#007BFF",
-      color: "white",
-      borderRadius: "5px",
-      boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.3)",
-      display: "flex",
-      alignItems: "center", // Simge ve metni dikeyde hizalar
-      cursor: "pointer",
-    }}
-    title="Yol Tarifi Al"
-  >
-    <i
-      className="fas fa-directions"
-      style={{ fontSize: "16px" }}
-    ></i>
-    <span style={{ fontSize: "14px" }}></span>
-  </a>
-</div>
-<p
-    style={{
-      margin: "5px 0",
-      fontSize: "14px",
-      color: "#555",
-    }}
-  >
-    Hatlar: {findLinesForStation(selectedStation).join(", ")}
-  </p>
-            <p style={{ margin: "0 0 10px", fontSize: "14px", color: "#555" }}>
-              Bu durak {selectedStation.name} durağıdır. Yakındaki sosyal alanlar
-              aşağıda listelenmiştir.
-            </p>
-            <ul style={{ paddingLeft: "20px" }}>
-            {nearbyPlaces.map((place, index) => (
-                <li
-                  key={index}
-                  style={{
-                    fontSize: "14px",
-                    color: "#007BFF",
-                    marginBottom: "5px",
-                  }}
-                >
-                  {place.name} ({place.distance} km)
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <p
-            style={{
-              fontSize: "14px",
-              color: "#666",
-              textAlign: "center",
-            }}
-          >
-            Bir durak seçin, bilgileri burada görün.
-          </p>
-        )}
-      </div>
+      <StationPanel
+        selectedStation={selectedStation}
+        findLinesForStation={findLinesForStation}
+        fetchNearbyPlaces={fetchNearbyPlaces}
+        nearbyPlaces={nearbyPlaces}
+      />
 
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
@@ -482,7 +418,7 @@ export default function Map({ selectedLine, setSelectedLine }) {
       setSelectedStation(station);
       mapRef.current.panTo(station.location);
       mapRef.current.setZoom(15);
-      fetchNearbyPlaces(station.location);
+      //fetchNearbyPlaces(station.location);
     }}
     label={{
       text: station.name,

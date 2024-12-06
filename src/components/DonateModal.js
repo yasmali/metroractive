@@ -24,6 +24,7 @@ export default function DonateModal({ onClose }) {
 
   return (
     <div
+      className="modal-overlay-general"
       onClick={onClose} // Modal dışına tıklayınca kapanır
       style={{
         position: "fixed",
@@ -41,6 +42,7 @@ export default function DonateModal({ onClose }) {
       }}
     >
       <div
+        className="modal-content-general"
         onClick={(e) => e.stopPropagation()} // Modal içeriğine tıklayınca kapanmayı engeller
         style={{
           width: "100%",

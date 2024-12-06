@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="150">
+  <!-- "Durak360°" birleşik ve şık bir renkte -->
+  <text x="20" y="90" font-family="'Poppins', sans-serif" font-size="70" fill="#1C1C1E" font-weight="600" letter-spacing="-1">
+    Durak360°
+  </text>
+  <!-- Metro stilinde tasarım çizgisi, "ura" kısmının üzerinde ve biraz sola kaydırılmış -->
+  <line x1="75" y1="45" x2="165" y2="45" stroke="#B87333" stroke-width="4" stroke-linecap="round" />
+  <circle cx="75" cy="45" r="6" fill="#B87333" />
+  <circle cx="120" cy="45" r="6" fill="#B87333" />
+  <circle cx="165" cy="45" r="6" fill="#B87333" />
+
+  <!-- Hafif degrade bir çizgi, alt vurgu için -->
+  <line x1="20" y1="105" x2="480" y2="105" stroke="url(#gradient)" stroke-width="2" />
+  <!-- Degrade tanımlaması -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1C1C1E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B87333;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

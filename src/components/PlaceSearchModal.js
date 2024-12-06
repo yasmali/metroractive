@@ -154,6 +154,7 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
 
   return (
     <div
+      className="modal-overlay-general"
       onClick={onClose}
       style={{
         position: "fixed",
@@ -170,6 +171,7 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
       }}
     >
       <div
+        className="modal-content-general"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: "100%",

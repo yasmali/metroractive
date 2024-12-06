@@ -17,6 +17,7 @@ export default function FeedbackModal({ onClose }) {
 
   return (
     <div
+      className="modal-overlay-general"
       onClick={onClose} // Modal dışında bir yere tıklandığında kapanır
       style={{
         position: "fixed",
@@ -32,6 +33,7 @@ export default function FeedbackModal({ onClose }) {
       }}
     >
       <div
+        className="modal-content-general"
         onClick={(e) => e.stopPropagation()} // Modal içeriğine tıklandığında kapanmayı engelle
         style={{
           width: "450px",

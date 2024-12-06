@@ -367,8 +367,8 @@ export const metroLines = [
   },
   {
     id: 5,
-    name: "M3 Hattı",
-    color: "#00a8e1",
+    name: "M4 Hattı",
+    color: "#e91e76",
     stations: [
       {
         id: 68,

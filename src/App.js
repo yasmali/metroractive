@@ -2,100 +2,116 @@ import React, { useState } from "react";
 import Map from "./components/Map";
 import FeedbackModal from "./components/FeedbackModal";
 import DonateModal from "./components/DonateModal";
-import PlaceSearchModal from "./components/PlaceSearchModal"; // Yeni modalı import edin
+import PlaceSearchModal from "./components/PlaceSearchModal";
 import Logo from "./assets/durak360-logo.svg";
 import SocialLinksModal from "./components/SocialLinksModal";
 import "./App.css";
 
 function App() {
   const [selectedLine, setSelectedLine] = useState(null);
-  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false); // Geri bildirim modal kontrolü
-  const [isDonateOpen, setIsDonateOpen] = useState(false); // Bağış modal kontrolü
-  const [isPlaceSearchOpen, setIsPlaceSearchOpen] = useState(false); // Yeni modal için state
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isDonateOpen, setIsDonateOpen] = useState(false);
+  const [isPlaceSearchOpen, setIsPlaceSearchOpen] = useState(false);
   const [selectedStation, setSelectedStation] = useState(null);
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
 
   return (
     <div>
+      {/* Header Bölümü */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 20px",
+          backgroundColor: "#f8f9fa",
+          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+          position: "relative",
+          zIndex: 10,
         }}
       >
-        <img
-          src={Logo}
-          alt="Durak360 Logo"
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <img
+            src={Logo}
+            alt="Durak360 Logo"
+            style={{
+              height: "50px",
+              cursor: "pointer",
+            }}
+            onClick={() => setIsSocialModalOpen(true)}
+          />
+        </div>
+        <h2
           style={{
-            height: "60px",
-            marginLeft: "20px",
-            cursor: "pointer",
-            marginBottom: "-4px",
+            fontSize: "20px",
+            margin: 0,
+            color: "#2c3e50",
+            flex: 1,
+            textAlign: "center",
           }}
-          onClick={() => setIsSocialModalOpen(true)}
-        />
-        <h1 style={{ textAlign: "center", flex: 1, marginRight: "60px" }}>
+        >
           İstanbul Metro Haritası {selectedLine && ` - ${selectedLine.name}`}
-        </h1>
+        </h2>
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+          }}
+        >
+          <button
+            onClick={() => setIsFeedbackOpen(true)}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#007BFF",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              fontSize: "16px",
+            }}
+          >
+            Geri Bildirim
+          </button>
+          <button
+            onClick={() => setIsDonateOpen(true)}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#28a745",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              fontSize: "16px",
+            }}
+          >
+            Donate Me
+          </button>
+          <button
+            onClick={() => setIsPlaceSearchOpen(true)}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#FFC107",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              fontSize: "16px",
+            }}
+          >
+            Yer Ara
+          </button>
+        </div>
       </div>
+      {/* Map ve Diğer İçerikler */}
       <Map
         selectedLine={selectedLine}
         setSelectedLine={setSelectedLine}
         selectedStation={selectedStation}
         setSelectedStation={setSelectedStation}
       />
-      <div
-        style={{
-          position: "absolute",
-          top: "14px",
-          right: "20px",
-          display: "flex",
-          gap: "10px", // Butonlar arasında boşluk
-        }}
-      >
-        <button
-          onClick={() => setIsFeedbackOpen(true)}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#007BFF",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          Geri Bildirim
-        </button>
-        <button
-          onClick={() => setIsDonateOpen(true)}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#28a745",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          Donate Me
-        </button>
-        <button
-          onClick={() => setIsPlaceSearchOpen(true)}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#FFC107",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          Yer Ara
-        </button>
-      </div>
       {isFeedbackOpen && (
         <FeedbackModal onClose={() => setIsFeedbackOpen(false)} />
       )}

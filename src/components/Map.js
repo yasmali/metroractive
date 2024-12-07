@@ -35,16 +35,16 @@ const hexToRgb = (hex) => {
 const polylineOptions = (color, isSelected) => ({
   strokeColor: isSelected ? `rgba(${hexToRgb(color)}, 1)` : color,
   strokeOpacity: isSelected ? 1 : 0.8,
-  strokeWeight: isSelected ? 10 : 8, // Daha kalın çizgi
+  strokeWeight: isSelected ? 10 : 8,
   geodesic: true,
-  zIndex: isSelected ? 10 : 5, // Seçilen hattı ön planda göstermek için zIndex artırıldı
+  zIndex: isSelected ? 10 : 5,
   icons: isSelected
     ? [
         {
           icon: {
-            path: "M 0,-1 0,1", // Glow efekti
+            path: "M 0,-1 0,1",
             strokeOpacity: 0.8,
-            strokeWeight: 22, // Parlak alanın genişliği
+            strokeWeight: 22,
             strokeColor: `rgba(${hexToRgb(color)}, 0.3)`,
           },
           offset: "0",
@@ -54,11 +54,32 @@ const polylineOptions = (color, isSelected) => ({
     : [],
 });
 
+const routePolylineOptions = {
+  strokeColor: "rgba(255, 165, 0, 0.8)", // Altın rengi
+  strokeWeight: 8, // Çizgi kalınlığı
+  strokeOpacity: 1, // Çizgi opaklığı
+  zIndex: 30, // Çizgi önceliği
+  icons: [
+    {
+      icon: {
+        path: "M 0 0 m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0", // Çember SVG path
+        fillOpacity: 1,
+        fillColor: "rgba(255, 215, 0, 0.9)", // Çemberin dolgu rengi
+        strokeOpacity: 1,
+        strokeColor: "rgba(255, 165, 0, 1)", // Çember kenar rengi
+        scale: 2, // Çember büyüklüğü
+      },
+      offset: "0", // İlk sembolün başlangıç noktası
+      repeat: "20px", // Semboller arasındaki mesafe
+    },
+  ],
+};
+
 const restrictedBounds = {
-  north: 41.5, // En kuzeydeki koordinat daha yukarıya çekildi
-  south: 40.5, // En güneydeki koordinat daha aşağıya çekildi
-  east: 29.9, // En doğudaki koordinat daha doğuya çekildi
-  west: 27.8, // En batıdaki koordinat daha batıya çekildi
+  north: 41.5,
+  south: 40.5,
+  east: 29.9,
+  west: 27.8,
 };
 
 export default function Map({
@@ -66,6 +87,10 @@ export default function Map({
   setSelectedLine,
   selectedStation,
   setSelectedStation,
+  placeA,
+  placeB,
+  route,
+  routeDetails,
 }) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: "AIzaSyCIGAdr7-swS3vx_cj0pJAMKmMEKk14Wj4",
@@ -73,11 +98,55 @@ export default function Map({
   });
 
   const mapRef = useRef(null);
+  const [routePolyline, setRoutePolyline] = useState(null);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
   const [mapZoom, setMapZoom] = useState(6);
   const [trainPosition, setTrainPosition] = useState(null);
-  const [selectedCategories, setSelectedCategories] = useState([]); // State taşındı
-  const [isPanelLoading, setIsPanelLoading] = useState(false); // Loader için state
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [isPanelLoading, setIsPanelLoading] = useState(false);
+
+  const dashedLineOptions = {
+    strokeOpacity: 0, // Ana çizgi görünmez yapılır
+    strokeWeight: 4, // Çizgi kalınlığı
+    icons: [
+      {
+        icon: {
+          path: "M 0,-1 0,1", // Kesikli çizgi sembolü
+          strokeOpacity: 1,
+          scale: 4,
+        },
+        offset: "0",
+        repeat: "20px", // Kesikler arasındaki boşluk
+      },
+    ],
+  };
+
+  // Başlangıç noktasından en yakın metro durağına çizgi
+  const startLine =
+    placeA?.geometry?.location && route.length > 0
+      ? [
+          {
+            lat: placeA.geometry.location.lat(),
+            lng: placeA.geometry.location.lng(),
+          },
+          { lat: route[0].location.lat, lng: route[0].location.lng },
+        ]
+      : null;
+
+  // Bitiş noktasından en yakın metro durağına çizgi
+  const endLine =
+    placeB?.geometry?.location && route.length > 0
+      ? [
+          {
+            lat: placeB.geometry.location.lat(),
+            lng: placeB.geometry.location.lng(),
+          },
+          {
+            lat: route[route.length - 1].location.lat,
+            lng: route[route.length - 1].location.lng,
+          },
+        ]
+      : null;
 
   const handleZoomChanged = () => {
     if (mapRef.current) {
@@ -87,9 +156,9 @@ export default function Map({
   };
 
   const animateTrainOnLine = (line) => {
-    const path = line.stations.map((station) => station.location); // Polyline koordinatları
-    let currentIndex = 0; // Başlangıç noktası
-    let t = 0; // İki nokta arasındaki ilerleme yüzdesi (0-1 arası değer)
+    const path = line.stations.map((station) => station.location);
+    let currentIndex = 0;
+    let t = 0;
 
     const moveTrain = () => {
       const start = path[currentIndex];
@@ -97,39 +166,35 @@ export default function Map({
 
       if (!start || !end) return;
 
-      // Tren pozisyonunu interpolasyon ile hesapla
-      t += 0.04; // Adım boyutu (hız)
+      t += 0.04;
 
       if (t >= 1) {
-        // Hedefe ulaşıldığında
-        t = 0; // İlerleme sıfırlanır
-        currentIndex++; // Bir sonraki durağa geç
+        t = 0;
+        currentIndex++;
 
         if (currentIndex >= path.length - 1) {
-          // Son durağa ulaşıldığında geri dön
-          path.reverse(); // Koordinatları ters çevir
-          currentIndex = 0; // İlk durağa dön
+          path.reverse();
+          currentIndex = 0;
         }
 
         return;
       }
 
-      // Tren iki nokta arasında hareket eder
       const newLat = start.lat + t * (end.lat - start.lat);
       const newLng = start.lng + t * (end.lng - start.lng);
 
       setTrainPosition({ lat: newLat, lng: newLng });
     };
 
-    const interval = setInterval(moveTrain, 50); // 50ms güncelleme ile akıcı hareket
-    return () => clearInterval(interval); // Hat değiştirildiğinde animasyonu temizle
+    const interval = setInterval(moveTrain, 50);
+    return () => clearInterval(interval);
   };
 
   useEffect(() => {
     if (selectedLine) {
-      setTrainPosition(selectedLine.stations[0].location); // Treni ilk durağa yerleştir
-      const clearAnimation = animateTrainOnLine(selectedLine); // Animasyonu başlat
-      return () => clearAnimation(); // Hat değiştiğinde animasyonu durdur
+      setTrainPosition(selectedLine.stations[0].location);
+      const clearAnimation = animateTrainOnLine(selectedLine);
+      return () => clearAnimation();
     }
   }, [selectedLine]);
 
@@ -140,7 +205,7 @@ export default function Map({
     if (line && mapRef.current) {
       const bounds = new window.google.maps.LatLngBounds();
       line.stations.forEach((station) => bounds.extend(station.location));
-      mapRef.current.fitBounds(bounds); // Seçilen hattı ekrana sığdırır
+      mapRef.current.fitBounds(bounds);
       setSelectedStation(null);
       setNearbyPlaces([]);
       setSelectedCategories([]);
@@ -149,7 +214,6 @@ export default function Map({
   };
 
   const resetMap = () => {
-    debugger;
     mapRef.current.panTo(center);
     mapRef.current.setZoom(6);
     setSelectedStation(null);
@@ -158,17 +222,29 @@ export default function Map({
     setTrainPosition(null);
     setSelectedCategories([]);
     setNearbyPlaces([]);
+    setRoutePolyline(null);
   };
 
   const findLinesForStation = (station) => {
     return MetroLines.filter((line) =>
       line.stations.some((lineStation) => lineStation.name === station.name)
-    ).map((line) => line.name); // Hattın adını döndürür
+    ).map((line) => line.name);
   };
+
+  useEffect(() => {
+    if (placeA && placeB) {
+      setRoutePolyline(route);
+      if (mapRef.current && route.length > 0) {
+        const bounds = new window.google.maps.LatLngBounds();
+        route.forEach((station) => bounds.extend(station.location));
+        mapRef.current.fitBounds(bounds);
+      }
+    }
+  }, [placeA, placeB, route]);
 
   const fetchNearbyPlaces = async (location, categories) => {
     if (categories.length === 0) {
-      setNearbyPlaces([]); // Eğer kategori seçilmezse temizle
+      setNearbyPlaces([]);
       return;
     }
 
@@ -181,7 +257,7 @@ export default function Map({
           const request = {
             location,
             radius: 1000,
-            type, // Tek bir type gönderilir
+            type,
           };
 
           return new Promise((resolve, reject) => {
@@ -189,20 +265,18 @@ export default function Map({
               if (status === window.google.maps.places.PlacesServiceStatus.OK) {
                 resolve(results);
               } else {
-                resolve([]); // Hata durumunda boş array döndür
+                resolve([]);
               }
             });
           });
         })
       );
 
-      // Gelen tüm sonuçları birleştir ve tekrarlananları kaldır
       const mergedResults = allResults.flat();
       const uniqueResults = Array.from(
         new Set(mergedResults.map((place) => place.place_id))
       ).map((id) => mergedResults.find((place) => place.place_id === id));
 
-      // Mesafeleri hesapla ve sıralama yap
       const updatedResults = uniqueResults.map((place) => ({
         ...place,
         distance: calculateDistance(
@@ -213,7 +287,7 @@ export default function Map({
         ),
       }));
 
-      updatedResults.sort((a, b) => a.distance - b.distance); // Mesafeye göre sıralama
+      updatedResults.sort((a, b) => a.distance - b.distance);
 
       setNearbyPlaces(updatedResults);
       setIsPanelLoading(false);
@@ -226,7 +300,7 @@ export default function Map({
 
   const calculateDistance = (lat1, lng1, lat2, lng2) => {
     const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371; // Radius of Earth in km
+    const R = 6371;
     const dLat = toRad(lat2 - lat1);
     const dLng = toRad(lng2 - lng1);
     const a =
@@ -236,7 +310,7 @@ export default function Map({
         Math.sin(dLng / 2) *
         Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return (R * c).toFixed(2); // Distance in km
+    return (R * c).toFixed(2);
   };
 
   if (loadError) return <div>Harita yüklenirken bir hata oluştu</div>;
@@ -244,7 +318,6 @@ export default function Map({
 
   return (
     <div style={{ position: "relative" }}>
-      {/* Sol üstteki panel */}
       <StationPanel
         selectedStation={selectedStation}
         findLinesForStation={findLinesForStation}
@@ -265,67 +338,146 @@ export default function Map({
           fullscreenControl: false,
           restriction: {
             latLngBounds: restrictedBounds,
-            strictBounds: true, // Kullanıcının sınırların dışına çıkmasını engeller
+            strictBounds: true,
           },
         }}
         onLoad={(map) => (mapRef.current = map)}
-        onZoomChanged={handleZoomChanged} // Zoom değişikliği olayı
+        onZoomChanged={handleZoomChanged}
       >
-        {/* Metro Durak Marker'ları */}
-        {MetroLines.map((line) => (
+        {MetroLines.filter((line) => {
+          // Eğer route doluysa, sadece route içindeki duraklara sahip hatları dahil et
+          if (routePolyline) {
+            const routeStationNames = routePolyline.map(
+              (station) => station.name
+            ); // Route içindeki durak isimlerini alın
+            return (
+              line.railwayType !== "Marmaray" &&
+              line.stations.some((station) =>
+                routeStationNames.includes(station.name)
+              )
+            );
+          }
+          // Route boşsa tüm Marmaray olmayan hatları dahil et
+          return line.railwayType !== "Marmaray";
+        }).map((line) => (
           <React.Fragment key={line.id}>
-            {line.stations.map((station) => (
-              <Marker
-                key={station.id}
-                position={station.location}
-                title={station.name}
-                onClick={() => {
-                  setSelectedStation(station);
-                  mapRef.current.panTo(station.location);
-                  mapRef.current.setZoom(15);
-                  //   if (selectedCategories.length > 0){
-                  //     fetchNearbyPlaces(selectedStation.location, selectedCategories); // Parent'a seçili kategorileri gönder
-                  //   } else {
-                  setSelectedCategories([]);
-                  setNearbyPlaces([]);
-                  //   }
-                }}
-                label={{
-                  text: station.name,
-                  fontSize: "12px",
-                  fontWeight: "500",
-                  color:
-                    selectedStation?.id === station.id ? "#FF0000" : "#333", // Seçili durak için kırmızı
-                }}
-                icon={{
-                  url:
-                    selectedStation?.id === station.id
-                      ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png" // Seçili durak için kırmızı pin
-                      : "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", // Diğer duraklar için mavi pin
-                  scaledSize:
-                    selectedStation?.id === station.id
-                      ? new window.google.maps.Size(30, 30) // Seçili durak için büyük pin
-                      : new window.google.maps.Size(20, 20), // Diğer duraklar için küçük pin
-                  labelOrigin: new window.google.maps.Point(10, -10),
-                }}
-                animation={
-                  selectedStation?.id === station.id
-                    ? window.google.maps.Animation.BOUNCE // Seçili durak için animasyon
-                    : null
+            {line.stations
+              .filter((station) => {
+                // Sadece route içinde olan durakları filtrele
+                if (routePolyline) {
+                  const routeStationNames = routePolyline.map(
+                    (station) => station.name
+                  );
+                  return routeStationNames.includes(station.name);
                 }
-              />
-            ))}
+                return true; // Route boşsa tüm durakları göster
+              })
+              .map((station) => (
+                <Marker
+                  key={station.id}
+                  position={station.location}
+                  title={station.name}
+                  onClick={() => {
+                    setSelectedStation(station);
+                    mapRef.current.panTo(station.location);
+                    mapRef.current.setZoom(15);
+                    setSelectedCategories([]);
+                    setNearbyPlaces([]);
+                  }}
+                  label={{
+                    text: station.name,
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    color:
+                      selectedStation?.id === station.id ? "#FF0000" : "#333",
+                  }}
+                  icon={{
+                    url:
+                      selectedStation?.id === station.id
+                        ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                        : "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+                    scaledSize:
+                      selectedStation?.id === station.id
+                        ? new window.google.maps.Size(30, 30)
+                        : new window.google.maps.Size(20, 20),
+                    labelOrigin: new window.google.maps.Point(10, -10),
+                  }}
+                  animation={
+                    selectedStation?.id === station.id
+                      ? window.google.maps.Animation.BOUNCE
+                      : null
+                  }
+                />
+              ))}
 
-            {/* Metro hattı Polyline */}
-            <Polyline
-              path={line.stations.map((station) => station.location)}
-              options={polylineOptions(
-                line.color,
-                line.id === selectedLine?.id
-              )}
-            />
+            {!routePolyline && (
+              <Polyline
+                path={line.stations.map((station) => station.location)}
+                options={polylineOptions(
+                  line.color,
+                  line.id === selectedLine?.id
+                )}
+              />
+            )}
           </React.Fragment>
         ))}
+
+        {/* Kesikli Çizgiler */}
+        {startLine && <Polyline path={startLine} options={dashedLineOptions} />}
+        {endLine && <Polyline path={endLine} options={dashedLineOptions} />}
+
+        {routePolyline && (
+          <Polyline
+            path={routePolyline.map((station) => {
+              if (!station || !station.location) {
+                console.error("Eksik veya geçersiz istasyon:", station);
+                return null; // Geçersiz istasyonu atla
+              }
+              return station.location;
+            })}
+            options={routePolylineOptions}
+          />
+        )}
+
+        {/* Başlangıç Noktası Marker */}
+        {placeA?.geometry?.location && (
+          <Marker
+            position={{
+              lat: placeA.geometry.location.lat(),
+              lng: placeA.geometry.location.lng(),
+            }}
+            label={{
+              text: placeA?.name,
+              color: "#da6161",
+              fontSize: "16px",
+              fontWeight: "bold",
+            }}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png", // Başlangıç için yeşil pin
+              labelOrigin: new window.google.maps.Point(10, -10),
+            }}
+          />
+        )}
+
+        {/* Bitiş Noktası Marker */}
+        {placeB?.geometry?.location && (
+          <Marker
+            position={{
+              lat: placeB.geometry.location.lat(),
+              lng: placeB.geometry.location.lng(),
+            }}
+            label={{
+              text: placeB?.name,
+              color: "#da6161",
+              fontSize: "16px",
+              fontWeight: "bold",
+            }}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png", // Bitiş için kırmızı pin
+              labelOrigin: new window.google.maps.Point(10, -10),
+            }}
+          />
+        )}
 
         {/* Nearby Places Marker'ları */}
         {nearbyPlaces.map((place, index) => (
@@ -350,20 +502,51 @@ export default function Map({
             }}
           />
         ))}
+
         {trainPosition && (
           <Marker
             position={trainPosition}
             icon={{
               url: trainIcon,
-              scaledSize: new window.google.maps.Size(40, 40), // Marker boyutu,
+              scaledSize: new window.google.maps.Size(40, 40),
               zIndex: 10,
             }}
             title="Tren"
           />
         )}
+        {routeDetails.length > 0 && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "20px",
+              left: "20px",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              padding: "20px",
+              borderRadius: "10px",
+              boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+              maxWidth: "300px",
+              zIndex: 10,
+            }}
+          >
+            <h3 style={{ marginTop: 0 }}>Güzergah Detayları</h3>
+            <p>
+              <strong>A Noktası:</strong> {placeA?.name || "Belirtilmedi"}
+              <br />
+              <strong>B Noktası:</strong> {placeB?.name || "Belirtilmedi"}
+            </p>
+            <ul style={{ padding: 0, listStyleType: "none" }}>
+              {routeDetails.map((detail, index) => (
+                <li key={index} style={{ marginBottom: "10px" }}>
+                  <strong>{detail.lineName} Hattı:</strong>
+                  <br />
+                  {detail.start} → {detail.end}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </GoogleMap>
 
-      {/* ComboBox ve Reset Butonu */}
       <div
         style={{
           position: "absolute",

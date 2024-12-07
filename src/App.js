@@ -15,6 +15,12 @@ function App() {
   const [selectedStation, setSelectedStation] = useState(null);
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
 
+  // Başlangıç ve hedef duraklar
+  const [placeA, setPlaceA] = useState(null);
+  const [placeB, setPlaceB] = useState(null);
+  const [route, setRoute] = useState([]);
+  const [routeDetails, setRouteDetails] = useState([]); // Güzergah detayları
+
   return (
     <div>
       {/* Header Bölümü */}
@@ -111,6 +117,10 @@ function App() {
         setSelectedLine={setSelectedLine}
         selectedStation={selectedStation}
         setSelectedStation={setSelectedStation}
+        placeA={placeA} // Başlangıç durağı
+        placeB={placeB} // Hedef durağı
+        route={route} // Güzergah bilgisi
+        routeDetails={routeDetails} // Güzergah detayları
       />
       {isFeedbackOpen && (
         <FeedbackModal onClose={() => setIsFeedbackOpen(false)} />
@@ -123,6 +133,11 @@ function App() {
             setSelectedStation(station);
             setSelectedLine(station.line);
           }}
+          // Başlangıç ve hedef duraklar için setter fonksiyonlarını aktar
+          setPlaceA={setPlaceA}
+          setPlaceB={setPlaceB}
+          setRoute={setRoute} // Burada gönderiliyor
+          setRouteDetails={setRouteDetails} // Detaylar için prop
         />
       )}
       {isSocialModalOpen && (

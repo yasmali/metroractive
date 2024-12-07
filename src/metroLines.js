@@ -4,6 +4,7 @@ export const metroLines = [
     id: 1,
     name: "M1A Hattı",
     color: "#e72419",
+    railwayType: "Metro",
     stations: [
       {
         id: 1,
@@ -27,7 +28,7 @@ export const metroLines = [
       },
       {
         id: 5,
-        name: "Bayrampaşa - Maltepe",
+        name: "Bayrampaşa-Maltepe",
         location: { lat: 41.03436259003804, lng: 28.92140057669758 },
       },
       {
@@ -60,7 +61,7 @@ export const metroLines = [
         id: 11,
         name: "Merter",
         location: { lat: 41.007388105458915, lng: 28.896315225325452 },
-      }, //Bakılacak
+      },
       {
         id: 12,
         name: "Zeytinburnu",
@@ -70,7 +71,7 @@ export const metroLines = [
         id: 13,
         name: "Bakırköy-İncirli",
         location: { lat: 40.99675052992498, lng: 28.8753070967955 },
-      }, //Bakılacak
+      },
       {
         id: 14,
         name: "Bahçelievler",
@@ -102,9 +103,10 @@ export const metroLines = [
     id: 2,
     name: "M1B Hattı",
     color: "#e72419",
+    railwayType: "Metro",
     stations: [
       {
-        id: 9,
+        id: 19,
         name: "Yenikapı",
         location: { lat: 41.00557755694778, lng: 28.950457563563546 },
       },
@@ -175,6 +177,7 @@ export const metroLines = [
     id: 3,
     name: "M2 Hattı",
     color: "#009944",
+    railwayType: "Metro",
     stations: [
       {
         id: 32,
@@ -262,6 +265,7 @@ export const metroLines = [
     id: 4,
     name: "M3 Hattı",
     color: "#00a8e1",
+    railwayType: "Metro",
     stations: [
       {
         id: 48,
@@ -369,6 +373,7 @@ export const metroLines = [
     id: 5,
     name: "M4 Hattı",
     color: "#e91e76",
+    railwayType: "Metro",
     stations: [
       {
         id: 68,
@@ -484,6 +489,57 @@ export const metroLines = [
         id: 90,
         name: "Sabiha Gökçen Havalimanı",
         location: { lat: 40.90641683390656, lng: 29.310996479378556 },
+      },
+    ],
+  },
+  {
+    id: 6,
+    name: "Halkalı-Gebze Banliyö Hattı (Marmaray-TCDD)",
+    color: "#63656a",
+    railwayType: "Marmaray",
+    stations: [
+      {
+        id: 91,
+        name: "Ayrılık Çeşmesi",
+        location: { lat: 41.00024371196179, lng: 29.030206902070447 },
+      },
+      {
+        id: 92,
+        name: "Üsküdar",
+        location: { lat: 41.02566688047731, lng: 29.015010356006606 },
+      },
+      {
+        id: 93,
+        name: "Sirkeci",
+        location: { lat: 41.01356651734699, lng: 28.976825215793156 },
+      },
+      {
+        id: 94,
+        name: "Yenikapı",
+        location: { lat: 41.00557755694778, lng: 28.950457563563546 },
+      },
+    ],
+  },
+  {
+    id: 7,
+    name: "M5 Hattı",
+    color: "#663165",
+    railwayType: "Metro",
+    stations: [
+      {
+        id: 95,
+        name: "Üsküdar",
+        location: { lat: 41.02566688047731, lng: 29.015010356006606 },
+      },
+      {
+        id: 96,
+        name: "Fıstıkağacı",
+        location: { lat: 41.02818234313364, lng: 29.028548878847598 },
+      },
+      {
+        id: 97,
+        name: "Bağlarbaşı",
+        location: { lat: 41.02166726265411, lng: 29.035429801978456 },
       },
     ],
   },

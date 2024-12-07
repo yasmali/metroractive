@@ -1,42 +1,59 @@
-// PlaceSearchModal.js
 import React, { useState, useEffect, useRef } from "react";
 import MetroLines from "../metroLines.js";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
 
-export default function PlaceSearchModal({ onClose, onSelectStation }) {
-  const [place, setPlace] = useState(() => {
-    const savedPlace = sessionStorage.getItem("savedPlace");
-    return savedPlace ? JSON.parse(savedPlace) : null;
-  });
-  const [nearestStations, setNearestStations] = useState(() => {
-    const savedStations = sessionStorage.getItem("savedStations");
-    return savedStations ? JSON.parse(savedStations) : [];
-  });
+export default function PlaceSearchModal({
+  onClose,
+  setPlaceA,
+  setPlaceB,
+  setRoute, // App.js'den rota aktarımı için prop
+  setRouteDetails,
+}) {
+  const [nearestStationsA, setNearestStationsA] = useState([]);
+  const [nearestStationsB, setNearestStationsB] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const inputRef = useRef(null);
-  const autocompleteRef = useRef(null);
+
+  const inputARef = useRef(null);
+  const inputBRef = useRef(null);
+  const autocompleteARef = useRef(null);
+  const autocompleteBRef = useRef(null);
 
   const istanbulBounds = {
-    north: 41.3201, // İstanbul'un kuzey sınırı
-    south: 40.8021, // İstanbul'un güney sınırı
-    east: 29.4622, // İstanbul'un doğu sınırı
-    west: 28.4088, // İstanbul'un batı sınırı
+    north: 41.3201,
+    south: 40.8021,
+    east: 29.4622,
+    west: 28.4088,
   };
 
   useEffect(() => {
     const loadAutocomplete = () => {
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(
-        inputRef.current,
+      // Başlangıç durağı için autocomplete
+      autocompleteARef.current = new window.google.maps.places.Autocomplete(
+        inputARef.current,
         {
-          bounds: istanbulBounds, // İstanbul sınırlarını belirtiyoruz
-          strictBounds: true, // Sadece bu sınırlar içinde arama yapılır
+          bounds: istanbulBounds,
+          strictBounds: true,
           types: ["geocode", "establishment"],
         }
       );
-      autocompleteRef.current.addListener("place_changed", () => {
-        const selectedPlace = autocompleteRef.current.getPlace();
-        setPlace(selectedPlace);
+      autocompleteARef.current.addListener("place_changed", () => {
+        const selectedPlace = autocompleteARef.current.getPlace();
+        setPlaceA(selectedPlace); // App.js'e aktarılır
+        findNearestStations(selectedPlace, setNearestStationsA);
+      });
+
+      // Hedef durağı için autocomplete
+      autocompleteBRef.current = new window.google.maps.places.Autocomplete(
+        inputBRef.current,
+        {
+          bounds: istanbulBounds,
+          strictBounds: true,
+          types: ["geocode", "establishment"],
+        }
+      );
+      autocompleteBRef.current.addListener("place_changed", () => {
+        const selectedPlace = autocompleteBRef.current.getPlace();
+        setPlaceB(selectedPlace); // App.js'e aktarılır
+        findNearestStations(selectedPlace, setNearestStationsB);
       });
     };
 
@@ -47,15 +64,12 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
         loadAutocomplete();
       };
     }
-  }, []);
+  }, [setPlaceA, setPlaceB]);
 
-  useEffect(() => {
+  const findNearestStations = (place, setStations) => {
     if (place && place.geometry) {
       setIsLoading(true);
-      // Seçilen yere en yakın 3 durağı bul
       const { lat, lng } = place.geometry.location;
-
-      // Eğer lat veya lng undefined ise işlemi durdur
       if (typeof lat !== "function" || typeof lng !== "function") {
         console.error("Geçersiz yer bilgisi: latitude veya longitude eksik.");
         setIsLoading(false);
@@ -69,7 +83,6 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
       );
 
       const stationsWithDistance = allStations.map((station) => {
-        // Eğer istasyonun koordinatları geçerli değilse mesafeyi hesaplamadan geç
         if (
           typeof station.location.lat !== "number" ||
           typeof station.location.lng !== "number"
@@ -77,7 +90,7 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
           console.error(
             "Geçersiz istasyon bilgisi: latitude veya longitude eksik."
           );
-          return { ...station, distance: null };
+          return { ...station, distance: Infinity }; // Geçersiz koordinatlar için sonsuz mesafe
         }
 
         return {
@@ -91,41 +104,19 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
         };
       });
 
-      // Geçerli mesafeye sahip olan istasyonları filtrele
+      // Geçerli mesafelere göre sıralama
       const validStations = stationsWithDistance.filter(
-        (station) => station.distance !== null
+        (station) => station.distance !== Infinity
       );
+      validStations.sort((a, b) => a.distance - b.distance); // Mesafeye göre sıralama
 
-      // İstasyonları isim bazında distinct hale getir
-      const uniqueStations = Array.from(
-        new Map(
-          validStations.map((station) => [
-            station.name,
-            {
-              ...station,
-              lines: validStations
-                .filter((s) => s.name === station.name)
-                .map((s) => s.line.name), // Bağlı hatlar
-            },
-          ])
-        ).values()
-      );
+      // İlk 3 durağı al
+      const closestStations = validStations.slice(0, 3);
 
-      uniqueStations.sort((a, b) => a.distance - b.distance);
-
-      setNearestStations(uniqueStations.slice(0, 3));
+      setStations(closestStations);
       setIsLoading(false);
     }
-  }, [place]);
-
-  useEffect(() => {
-    if (place) {
-      sessionStorage.setItem("savedPlace", JSON.stringify(place));
-    }
-    if (nearestStations.length > 0) {
-      sessionStorage.setItem("savedStations", JSON.stringify(nearestStations));
-    }
-  }, [place, nearestStations]);
+  };
 
   const calculateDistance = (lat1, lng1, lat2, lng2) => {
     const toRad = (value) => (value * Math.PI) / 180;
@@ -142,14 +133,256 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
     return R * c; // Mesafe (km)
   };
 
-  const handleClear = () => {
-    setPlace(null);
-    setNearestStations([]);
-    if (inputRef.current) {
-      inputRef.current.value = "";
+  const handleRouteCreate = () => {
+    if (nearestStationsA.length > 0 && nearestStationsB.length > 0) {
+      const startStation = nearestStationsA[0];
+      const endStation = nearestStationsB[0];
+
+      const { route, details } = calculateRoute(startStation, endStation);
+      setRoute(route); // App.js'e güzergah aktarılır
+      setRouteDetails(details);
+      onClose(); // Modal kapatılır
     }
-    sessionStorage.removeItem("savedPlace");
-    sessionStorage.removeItem("savedStations");
+  };
+
+  const calculateRoute = (startStation, endStation) => {
+    debugger;
+    const graph = buildGraph(MetroLines, startStation, endStation);
+
+    const path = dijkstra(graph, startStation.name, endStation.name);
+
+    if (!path || path.length === 0) {
+      console.log("Route not found!");
+      return;
+    }
+
+    // Detayları oluştur
+    const details = buildRouteDetails(path);
+
+    // Güzergah için durakları bulun ve hat bilgisi ekleyin
+    const route = path.map((stationName) => {
+      const station = MetroLines.flatMap((line) => line.stations).find(
+        (station) => station.name === stationName
+      );
+
+      // İlgili hattı bulun
+      const line = MetroLines.find((line) =>
+        line.stations.some((s) => s.name === stationName)
+      );
+
+      return {
+        ...station,
+        line: line ? { id: line.id, name: line.name, color: line.color } : null, // Hat bilgisi
+      };
+    });
+
+    debugger;
+    return { route, details };
+  };
+
+  function buildGraph(lines) {
+    const graph = {};
+
+    lines.forEach((line) => {
+      line.stations.forEach((station, index) => {
+        if (!graph[station.name]) {
+          graph[station.name] = {};
+        }
+
+        // Önceki istasyon bağlantısı
+        if (index > 0) {
+          const prevStation = line.stations[index - 1];
+          graph[station.name][prevStation.name] = calculateDistance(
+            station.location.lat,
+            station.location.lng,
+            prevStation.location.lat,
+            prevStation.location.lng
+          );
+        }
+
+        // Sonraki istasyon bağlantısı
+        if (index < line.stations.length - 1) {
+          const nextStation = line.stations[index + 1];
+          graph[station.name][nextStation.name] = calculateDistance(
+            station.location.lat,
+            station.location.lng,
+            nextStation.location.lat,
+            nextStation.location.lng
+          );
+        }
+      });
+    });
+
+    return graph;
+  }
+
+  // Dijkstra algoritması
+  function dijkstra(graph, start, end) {
+    const distances = {};
+    const previous = {};
+    const queue = new Set(Object.keys(graph));
+
+    // Başlangıç noktaları başlatılıyor
+    Object.keys(graph).forEach((node) => {
+      distances[node] = Infinity;
+      previous[node] = null;
+    });
+    distances[start] = 0;
+
+    while (queue.size > 0) {
+      const current = Array.from(queue).reduce((minNode, node) =>
+        distances[node] < distances[minNode] ? node : minNode
+      );
+
+      if (current === end) break;
+
+      queue.delete(current);
+
+      Object.entries(graph[current]).forEach(([neighbor, weight]) => {
+        const alt = distances[current] + weight;
+        if (alt < distances[neighbor]) {
+          distances[neighbor] = alt;
+          previous[neighbor] = current;
+        }
+      });
+    }
+
+    // Path oluşturuluyor
+    const path = [];
+    let currentNode = end;
+
+    while (currentNode) {
+      path.unshift(currentNode);
+      currentNode = previous[currentNode];
+    }
+
+    return path.length ? path : null; // Eğer path boşsa null döndür
+  }
+
+  function buildRouteDetails(path) {
+    if (!Array.isArray(path) || path.length < 2) {
+      return [];
+    }
+
+    const details = [];
+    let currentLine = null;
+    let segmentStart = path[0];
+
+    for (let i = 1; i < path.length; i++) {
+      const currentStationName = path[i - 1];
+      const nextStationName = path[i];
+
+      const currentStation = MetroLines.flatMap((line) => line.stations).find(
+        (station) => station.name === currentStationName
+      );
+      const nextStation = MetroLines.flatMap((line) => line.stations).find(
+        (station) => station.name === nextStationName
+      );
+
+      if (!currentStation || !nextStation) continue;
+
+      const line = MetroLines.find(
+        (line) =>
+          line.stations.some(
+            (station) => station.name === currentStation.name
+          ) &&
+          line.stations.some((station) => station.name === nextStation.name)
+      );
+
+      if (!line) {
+        // İki istasyon arasında doğrudan bir hat yoksa kesikli çizgi
+        details.push({
+          type: "dash",
+          start: currentStation.name,
+          end: nextStation.name,
+          startLocation: currentStation.location,
+          endLocation: nextStation.location,
+        });
+        segmentStart = nextStation.name; // Geçici bağlantı tamamlandı
+        currentLine = null; // Yeni hat için sıfırla
+        continue;
+      }
+
+      // Eğer aynı hat üzerinde devam ediliyorsa
+      if (currentLine === line.name) {
+        continue;
+      }
+
+      // Yeni bir hat başlıyor
+      if (currentLine) {
+        details.push({
+          type: "line",
+          lineName: currentLine,
+          start: segmentStart,
+          end: currentStation.name,
+          startLocation: MetroLines.flatMap((line) => line.stations).find(
+            (station) => station.name === segmentStart
+          )?.location,
+          endLocation: currentStation.location,
+        });
+      }
+
+      currentLine = line.name;
+      segmentStart = currentStation.name;
+    }
+
+    // Son segmenti ekle
+    const finalStation = path[path.length - 1];
+    const finalStationObject = MetroLines.flatMap((line) => line.stations).find(
+      (station) => station.name === finalStation
+    );
+
+    if (currentLine && finalStationObject) {
+      details.push({
+        type: "line",
+        lineName: currentLine,
+        start: segmentStart,
+        end: finalStation,
+        startLocation: MetroLines.flatMap((line) => line.stations).find(
+          (station) => station.name === segmentStart
+        )?.location,
+        endLocation: finalStationObject.location,
+      });
+    }
+
+    return details;
+  }
+
+  const findTransferPoints = (lines, startStation, endStation) => {
+    const transferPoints = [];
+    lines.forEach((line) => {
+      if (line.stations.some((station) => station.name === startStation.name)) {
+        line.stations.forEach((station) => {
+          lines.forEach((otherLine) => {
+            if (
+              otherLine !== line &&
+              otherLine.stations.some(
+                (otherStation) => otherStation.name === endStation.name
+              )
+            ) {
+              otherLine.stations.forEach((otherStation) => {
+                if (station.name === otherStation.name) {
+                  transferPoints.push({
+                    name: station.name,
+                    location: station.location,
+                  });
+                }
+              });
+            }
+          });
+        });
+      }
+    });
+    return transferPoints;
+  };
+
+  const handleClear = () => {
+    setPlaceA(null);
+    setPlaceB(null);
+    setNearestStationsA([]);
+    setNearestStationsB([]);
+    if (inputARef.current) inputARef.current.value = "";
+    if (inputBRef.current) inputBRef.current.value = "";
   };
 
   return (
@@ -175,7 +408,7 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
         onClick={(e) => e.stopPropagation()}
         style={{
           width: "100%",
-          maxWidth: "500px",
+          maxWidth: "600px",
           padding: "30px",
           background: "#ffffff",
           borderRadius: "25px",
@@ -196,141 +429,48 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
             fontWeight: "bold",
           }}
         >
-          Yer Arama
+          Duraklar Arası Güzergah
         </h2>
+
+        {/* Başlangıç Durağı */}
         <div style={{ width: "100%", position: "relative" }}>
           <input
-            ref={inputRef}
+            ref={inputARef}
             type="text"
-            placeholder="Bir yer arayın..."
-            defaultValue={place?.name || ""} // Arama geçmişi korunuyor
+            placeholder="Başlangıç durağı ara..."
             style={{
               width: "100%",
               padding: "15px",
-              paddingRight: "45px", // Büyüteç simgesine yer açmak için sağ padding
+              paddingRight: "45px",
               border: "1px solid #dcdcdc",
               borderRadius: "20px",
               fontSize: "16px",
               outline: "none",
               boxSizing: "border-box",
-              transition: "box-shadow 0.3s ease, border-color 0.3s ease",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.boxShadow =
-                "0px 8px 20px rgba(0, 123, 255, 0.5)";
-              e.currentTarget.style.borderColor = "#007bff";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.boxShadow = "none";
-              e.currentTarget.style.borderColor = "#dcdcdc";
-            }}
-          />
-          <FontAwesomeIcon
-            icon={faSearch}
-            style={{
-              position: "absolute",
-              right: "15px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#007bff",
-              cursor: "pointer",
-              fontSize: "20px",
             }}
           />
         </div>
 
-        {isLoading ? (
-          <div style={{ marginTop: "20px" }}>
-            <div
-              className="loader"
-              style={{
-                border: "6px solid #f3f3f3",
-                borderTop: "6px solid #007bff",
-                borderRadius: "50%",
-                width: "50px",
-                height: "50px",
-                animation: "spin 1s linear infinite",
-                margin: "0 auto",
-              }}
-            ></div>
-            <p style={{ color: "#2c3e50", marginTop: "15px" }}>
-              Duraklar aranıyor...
-            </p>
-          </div>
-        ) : (
-          nearestStations.length > 0 && (
-            <div
-              style={{
-                backgroundColor: "#f0f4f8",
-                borderRadius: "20px",
-                padding: "25px",
-                boxShadow: "0px 10px 25px rgba(0, 0, 0, 0.1)",
-                textAlign: "left",
-                width: "100%",
-              }}
-            >
-              <h3
-                style={{
-                  margin: "0 0 15px",
-                  color: "#2c3e50",
-                  fontSize: "22px",
-                  fontWeight: "600",
-                }}
-              >
-                En Yakın Duraklar
-              </h3>
-              <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
-                {nearestStations.map((station) => (
-                  <li
-                    key={station.id}
-                    style={{
-                      padding: "20px",
-                      marginBottom: "12px",
-                      borderRadius: "15px",
-                      background: "#ffffff",
-                      cursor: "pointer",
-                      transition:
-                        "background 0.3s, transform 0.3s, box-shadow 0.3s",
-                      boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.08)",
-                    }}
-                    onClick={() => {
-                      onSelectStation(station);
-                      onClose();
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#e8f0fe";
-                      e.currentTarget.style.transform = "scale(1.03)";
-                      e.currentTarget.style.boxShadow =
-                        "0px 10px 20px rgba(0, 0, 0, 0.15)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#ffffff";
-                      e.currentTarget.style.transform = "scale(1)";
-                      e.currentTarget.style.boxShadow =
-                        "0px 6px 18px rgba(0, 0, 0, 0.08)";
-                    }}
-                  >
-                    <strong style={{ fontSize: "18px", color: "#2c3e50" }}>
-                      {station.name}
-                    </strong>
-                    <br />
-                    <span style={{ fontSize: "15px", color: "#7f8c8d" }}>
-                      {station.distance != null
-                        ? station.distance.toFixed(2)
-                        : "Bilinmiyor"}{" "}
-                      km uzaklıkta
-                    </span>
-                    <br />
-                    <small style={{ fontSize: "14px", color: "#95a5a6" }}>
-                      Hatlar: {station.lines.join(", ")}
-                    </small>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )
-        )}
+        {/* Hedef Durağı */}
+        <div style={{ width: "100%", position: "relative" }}>
+          <input
+            ref={inputBRef}
+            type="text"
+            placeholder="Hedef durağı ara..."
+            style={{
+              width: "100%",
+              padding: "15px",
+              paddingRight: "45px",
+              border: "1px solid #dcdcdc",
+              borderRadius: "20px",
+              fontSize: "16px",
+              outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
 
+        {/* Butonlar */}
         <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
           <button
             onClick={handleClear}
@@ -342,22 +482,23 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
               borderRadius: "15px",
               cursor: "pointer",
               fontSize: "17px",
-              transition: "background 0.3s, transform 0.3s, box-shadow 0.3s",
-              boxSizing: "border-box",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#5a6268";
-              e.currentTarget.style.transform = "scale(1.07)";
-              e.currentTarget.style.boxShadow =
-                "0px 12px 30px rgba(0, 0, 0, 0.25)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#6c757d";
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "none";
             }}
           >
             Temizle
+          </button>
+          <button
+            onClick={handleRouteCreate}
+            style={{
+              padding: "15px 30px",
+              backgroundColor: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "15px",
+              cursor: "pointer",
+              fontSize: "17px",
+            }}
+          >
+            Rota Oluştur
           </button>
           <button
             onClick={onClose}
@@ -369,19 +510,6 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
               borderRadius: "15px",
               cursor: "pointer",
               fontSize: "17px",
-              transition: "background 0.3s, transform 0.3s, box-shadow 0.3s",
-              boxSizing: "border-box",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#0056b3";
-              e.currentTarget.style.transform = "scale(1.07)";
-              e.currentTarget.style.boxShadow =
-                "0px 12px 30px rgba(0, 0, 0, 0.25)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#007bff";
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "none";
             }}
           >
             Kapat
@@ -391,12 +519,3 @@ export default function PlaceSearchModal({ onClose, onSelectStation }) {
     </div>
   );
 }
-
-// CSS for loader animation
-const loaderStyles = document.createElement("style");
-loaderStyles.innerHTML = `
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}`;
-document.head.appendChild(loaderStyles);

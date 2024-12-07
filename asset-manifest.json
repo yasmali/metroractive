@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/static/css/main.9c26c218.css",
-    "main.js": "/static/js/main.281bbbb8.js",
+    "main.js": "/static/js/main.c1f43c1c.js",
     "static/media/train.png": "/static/media/train.081c43875ac936fe3ec9.png",
     "static/media/durak360-logo.svg": "/static/media/durak360-logo.73f264755e3e430fd3f786ba37ce92c6.svg",
     "index.html": "/index.html",
     "main.9c26c218.css.map": "/static/css/main.9c26c218.css.map",
-    "main.281bbbb8.js.map": "/static/js/main.281bbbb8.js.map"
+    "main.c1f43c1c.js.map": "/static/js/main.c1f43c1c.js.map"
   },
   "entrypoints": [
     "static/css/main.9c26c218.css",
-    "static/js/main.281bbbb8.js"
+    "static/js/main.c1f43c1c.js"
   ]
 }

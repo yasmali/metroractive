@@ -9,6 +9,7 @@ import trainIcon from "../assets/train.png";
 import StationPanel from "./StationPanel";
 import MetroLines from "../metroLines.js";
 import MapStyle from "../mapStyle.js";
+import { calculateDistanceFixed } from "../utils/routeUtils.js";
 
 // Harita stil ayarları
 const mapContainerStyle = {
@@ -91,6 +92,9 @@ export default function Map({
   placeB,
   route,
   routeDetails,
+  setRouteDetails,
+  setPlaceA,
+  setPlaceB,
 }) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: "AIzaSyCIGAdr7-swS3vx_cj0pJAMKmMEKk14Wj4",
@@ -104,6 +108,7 @@ export default function Map({
   const [trainPosition, setTrainPosition] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [isPanelLoading, setIsPanelLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(true);
 
   const dashedLineOptions = {
     strokeOpacity: 0, // Ana çizgi görünmez yapılır
@@ -223,6 +228,9 @@ export default function Map({
     setSelectedCategories([]);
     setNearbyPlaces([]);
     setRoutePolyline(null);
+    setRouteDetails([]);
+    setPlaceA(null);
+    setPlaceB(null);
   };
 
   const findLinesForStation = (station) => {
@@ -279,7 +287,7 @@ export default function Map({
 
       const updatedResults = uniqueResults.map((place) => ({
         ...place,
-        distance: calculateDistance(
+        distance: calculateDistanceFixed(
           location.lat,
           location.lng,
           place.geometry.location.lat(),
@@ -296,21 +304,6 @@ export default function Map({
       setNearbyPlaces([]);
       setIsPanelLoading(false);
     }
-  };
-
-  const calculateDistance = (lat1, lng1, lat2, lng2) => {
-    const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371;
-    const dLat = toRad(lat2 - lat1);
-    const dLng = toRad(lng2 - lng1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return (R * c).toFixed(2);
   };
 
   if (loadError) return <div>Harita yüklenirken bir hata oluştu</div>;
@@ -384,13 +377,19 @@ export default function Map({
                     setSelectedCategories([]);
                     setNearbyPlaces([]);
                   }}
-                  label={{
-                    text: station.name,
-                    fontSize: "12px",
-                    fontWeight: "500",
-                    color:
-                      selectedStation?.id === station.id ? "#FF0000" : "#333",
-                  }}
+                  label={
+                    mapZoom > 12 || selectedLine || routePolyline
+                      ? {
+                          text: station.name,
+                          fontSize: "12px",
+                          fontWeight: "500",
+                          color:
+                            selectedStation?.id === station.id
+                              ? "#FF0000"
+                              : "#333",
+                        }
+                      : null
+                  }
                   icon={{
                     url:
                       selectedStation?.id === station.id
@@ -520,29 +519,61 @@ export default function Map({
               position: "absolute",
               bottom: "20px",
               left: "20px",
+              width: "300px", // Genişlik StationPanel ile aynı yapıldı
+              padding: "20px", // StationPanel ile uyumlu padding
               backgroundColor: "rgba(255, 255, 255, 0.9)",
-              padding: "20px",
               borderRadius: "10px",
               boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-              maxWidth: "300px",
               zIndex: 10,
+              overflow: "hidden",
             }}
           >
-            <h3 style={{ marginTop: 0 }}>Güzergah Detayları</h3>
-            <p>
-              <strong>A Noktası:</strong> {placeA?.name || "Belirtilmedi"}
-              <br />
-              <strong>B Noktası:</strong> {placeB?.name || "Belirtilmedi"}
-            </p>
-            <ul style={{ padding: 0, listStyleType: "none" }}>
-              {routeDetails.map((detail, index) => (
-                <li key={index} style={{ marginBottom: "10px" }}>
-                  <strong>{detail.lineName} Hattı:</strong>
-                  <br />
-                  {detail.start} → {detail.end}
-                </li>
-              ))}
-            </ul>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "10px 20px",
+                cursor: "pointer",
+                backgroundColor: "#f1f1f1",
+                borderTopLeftRadius: "10px",
+                borderTopRightRadius: "10px",
+              }}
+              onClick={() => setModalOpen(!modalOpen)}
+            >
+              <span style={{ fontWeight: "bold" }}>Güzergah Detayları</span>
+              <span style={{ marginLeft: "auto" }}>
+                {modalOpen ? "⬇️" : "⬆️"}
+              </span>{" "}
+              {/* Ok en sağa alındı */}
+            </div>
+            <div
+              style={{
+                maxHeight: modalOpen ? "300px" : "0", // Animasyon için yükseklik değişimi
+                overflowY: modalOpen ? "auto" : "hidden", // Kapandığında içeriği gizle
+                padding: modalOpen ? "10px" : "0", // Kapandığında padding'i sıfırla
+                transition: "all 0.3s ease", // Geçiş animasyonu
+              }}
+            >
+              {modalOpen && (
+                <>
+                  <p>
+                    <strong>A Noktası:</strong> {placeA?.name || "Belirtilmedi"}
+                    <br />
+                    <strong>B Noktası:</strong> {placeB?.name || "Belirtilmedi"}
+                  </p>
+                  <ul style={{ padding: 0, listStyleType: "none" }}>
+                    {routeDetails.map((detail, index) => (
+                      <li key={index} style={{ marginBottom: "10px" }}>
+                        <strong>{detail.lineName} Hattı:</strong>
+                        <br />
+                        {detail.start} → {detail.end}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
           </div>
         )}
       </GoogleMap>

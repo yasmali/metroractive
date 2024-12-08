@@ -6,7 +6,7 @@ export default function PlaceSearchModal({
   onClose,
   setPlaceA,
   setPlaceB,
-  setRoute, // App.js'den rota aktarımı için prop
+  setRoute,
   setRouteDetails,
 }) {
   const [nearestStationsA, setNearestStationsA] = useState([]);
@@ -27,7 +27,6 @@ export default function PlaceSearchModal({
 
   useEffect(() => {
     const loadAutocomplete = () => {
-      // Başlangıç durağı için autocomplete
       autocompleteARef.current = new window.google.maps.places.Autocomplete(
         inputARef.current,
         {
@@ -38,11 +37,10 @@ export default function PlaceSearchModal({
       );
       autocompleteARef.current.addListener("place_changed", () => {
         const selectedPlace = autocompleteARef.current.getPlace();
-        setPlaceA(selectedPlace); // App.js'e aktarılır
+        setPlaceA(selectedPlace);
         findNearestStations(selectedPlace, setNearestStationsA);
       });
 
-      // Hedef durağı için autocomplete
       autocompleteBRef.current = new window.google.maps.places.Autocomplete(
         inputBRef.current,
         {
@@ -53,7 +51,7 @@ export default function PlaceSearchModal({
       );
       autocompleteBRef.current.addListener("place_changed", () => {
         const selectedPlace = autocompleteBRef.current.getPlace();
-        setPlaceB(selectedPlace); // App.js'e aktarılır
+        setPlaceB(selectedPlace);
         findNearestStations(selectedPlace, setNearestStationsB);
       });
     };
@@ -68,14 +66,15 @@ export default function PlaceSearchModal({
   }, [setPlaceA, setPlaceB]);
 
   const handleRouteCreate = () => {
+    debugger;
     if (nearestStationsA.length > 0 && nearestStationsB.length > 0) {
       const startStation = nearestStationsA[0];
       const endStation = nearestStationsB[0];
 
       const { route, details } = calculateRoute(startStation, endStation);
-      setRoute(route); // App.js'e güzergah aktarılır
+      setRoute(route);
       setRouteDetails(details);
-      onClose(); // Modal kapatılır
+      onClose();
     }
   };
 
@@ -103,7 +102,7 @@ export default function PlaceSearchModal({
           console.error(
             "Geçersiz istasyon bilgisi: latitude veya longitude eksik."
           );
-          return { ...station, distance: Infinity }; // Geçersiz koordinatlar için sonsuz mesafe
+          return { ...station, distance: Infinity };
         }
 
         return {
@@ -117,13 +116,10 @@ export default function PlaceSearchModal({
         };
       });
 
-      // Geçerli mesafelere göre sıralama
       const validStations = stationsWithDistance.filter(
         (station) => station.distance !== Infinity
       );
-      validStations.sort((a, b) => a.distance - b.distance); // Mesafeye göre sıralama
-
-      // İlk 3 durağı al
+      validStations.sort((a, b) => a.distance - b.distance);
       const closestStations = validStations.slice(0, 3);
 
       setStations(closestStations);
@@ -150,122 +146,119 @@ export default function PlaceSearchModal({
         left: 0,
         width: "100vw",
         height: "100vh",
-        background: "rgba(0, 0, 0, 0.8)",
+        background: "rgba(0, 0, 0, 0.6)",
         display: "flex",
-        alignItems: "center",
         justifyContent: "center",
+        alignItems: "center",
         zIndex: 1000,
-        padding: "20px",
+        backdropFilter: "blur(8px)",
       }}
     >
       <div
         className="modal-content-general"
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "100%",
-          maxWidth: "600px",
+          width: "90%",
+          maxWidth: "500px",
+          background: "#fff",
+          borderRadius: "20px",
+          boxShadow: "0 8px 20px rgba(0, 0, 0, 0.3)",
           padding: "30px",
-          background: "#ffffff",
-          borderRadius: "25px",
-          boxShadow: "0px 20px 40px rgba(0, 0, 0, 0.5)",
           textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-          position: "relative",
-          alignItems: "center",
+          animation: "slideIn 0.4s ease-in-out",
+          fontFamily: "Arial, sans-serif",
         }}
       >
         <h2
-          style={{
-            margin: 0,
-            color: "#2c3e50",
-            fontSize: "28px",
-            fontWeight: "bold",
-          }}
+          style={{ color: "#2c3e50", fontSize: "28px", marginBottom: "10px" }}
         >
-          Duraklar Arası Güzergah
+          🚇 Rota Planlayıcı
         </h2>
+        <p style={{ fontSize: "16px", color: "#555", marginBottom: "20px" }}>
+          Başlangıç ve hedef noktalarınızı seçerek en yakın istasyonları bulun
+          ve bir güzergah oluşturun.
+        </p>
 
-        {/* Başlangıç Durağı */}
-        <div style={{ width: "100%", position: "relative" }}>
-          <input
-            ref={inputARef}
-            type="text"
-            placeholder="Başlangıç durağı ara..."
-            style={{
-              width: "100%",
-              padding: "15px",
-              paddingRight: "45px",
-              border: "1px solid #dcdcdc",
-              borderRadius: "20px",
-              fontSize: "16px",
-              outline: "none",
-              boxSizing: "border-box",
-            }}
-          />
-        </div>
+        <input
+          ref={inputARef}
+          type="text"
+          placeholder="Başlangıç noktası"
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginBottom: "15px",
+            border: "1px solid #ddd",
+            borderRadius: "10px",
+            fontSize: "16px",
+            boxSizing: "border-box",
+            outline: "none",
+          }}
+        />
+        <input
+          ref={inputBRef}
+          type="text"
+          placeholder="Hedef noktası"
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginBottom: "20px",
+            border: "1px solid #ddd",
+            borderRadius: "10px",
+            fontSize: "16px",
+            boxSizing: "border-box",
+            outline: "none",
+          }}
+        />
 
-        {/* Hedef Durağı */}
-        <div style={{ width: "100%", position: "relative" }}>
-          <input
-            ref={inputBRef}
-            type="text"
-            placeholder="Hedef durağı ara..."
-            style={{
-              width: "100%",
-              padding: "15px",
-              paddingRight: "45px",
-              border: "1px solid #dcdcdc",
-              borderRadius: "20px",
-              fontSize: "16px",
-              outline: "none",
-              boxSizing: "border-box",
-            }}
-          />
-        </div>
-
-        {/* Butonlar */}
-        <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
           <button
             onClick={handleClear}
             style={{
-              padding: "15px 30px",
-              backgroundColor: "#6c757d",
-              color: "white",
+              background: "#6c757d",
+              color: "#fff",
               border: "none",
-              borderRadius: "15px",
+              padding: "10px 20px",
+              borderRadius: "10px",
               cursor: "pointer",
-              fontSize: "17px",
+              fontSize: "14px",
+              transition: "all 0.3s ease",
             }}
+            onMouseEnter={(e) => (e.target.style.background = "#5a6268")}
+            onMouseLeave={(e) => (e.target.style.background = "#6c757d")}
           >
             Temizle
           </button>
           <button
             onClick={handleRouteCreate}
             style={{
-              padding: "15px 30px",
-              backgroundColor: "#007bff",
-              color: "white",
+              background: "#007bff",
+              color: "#fff",
               border: "none",
-              borderRadius: "15px",
+              padding: "10px 20px",
+              borderRadius: "10px",
               cursor: "pointer",
-              fontSize: "17px",
+              fontSize: "14px",
+              transition: "all 0.3s ease",
             }}
+            onMouseEnter={(e) => (e.target.style.background = "#0056b3")}
+            onMouseLeave={(e) => (e.target.style.background = "#007bff")}
           >
             Rota Oluştur
           </button>
           <button
             onClick={onClose}
             style={{
-              padding: "15px 30px",
-              backgroundColor: "#007bff",
-              color: "white",
+              background: "#ff5a5f",
+              color: "#fff",
               border: "none",
-              borderRadius: "15px",
+              padding: "10px 20px",
+              borderRadius: "10px",
               cursor: "pointer",
-              fontSize: "17px",
+              fontSize: "14px",
+              transition: "all 0.3s ease",
             }}
+            onMouseEnter={(e) => (e.target.style.background = "#e94e4b")}
+            onMouseLeave={(e) => (e.target.style.background = "#ff5a5f")}
           >
             Kapat
           </button>

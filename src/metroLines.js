@@ -541,6 +541,91 @@ export const metroLines = [
         name: "Bağlarbaşı",
         location: { lat: 41.02166726265411, lng: 29.035429801978456 },
       },
+      {
+        id: 98,
+        name: "Altunizade",
+        location: { lat: 41.02193730116399, lng: 29.048293613566006 },
+      },
+      {
+        id: 99,
+        name: "Kısıklı",
+        location: { lat: 41.02216284987899, lng: 29.06215816082485 },
+      },
+      {
+        id: 100,
+        name: "Bulgurlu",
+        location: { lat: 41.01622813775295, lng: 29.076291210187378 },
+      },
+      {
+        id: 101,
+        name: "Ümraniye",
+        location: { lat: 41.024735218094385, lng: 29.084820773769092 },
+      },
+      {
+        id: 102,
+        name: "Çarşı",
+        location: { lat: 41.02588197836718, lng: 29.09716054378534 },
+      },
+      {
+        id: 103,
+        name: "Yamanevler",
+        location: { lat: 41.02439022740783, lng: 29.108996943262436 },
+      },
+      {
+        id: 104,
+        name: "Çakmak",
+        location: { lat: 41.02165083684554, lng: 29.11830913873107 },
+      },
+      {
+        id: 105,
+        name: "Ihlamurkuyu",
+        location: { lat: 41.01938762104372, lng: 29.131300958649526 },
+      },
+      {
+        id: 106,
+        name: "Altınşehir",
+        location: { lat: 41.01672679496211, lng: 29.14010353844572 },
+      },
+      {
+        id: 107,
+        name: "İmam Hatip Lisesi",
+        location: { lat: 41.0159564830637, lng: 29.151896946656812 },
+      },
+      {
+        id: 108,
+        name: "Dudullu",
+        location: { lat: 41.01559359367537, lng: 29.163350772033166 },
+      },
+      {
+        id: 109,
+        name: "Necip Fazıl",
+        location: { lat: 41.01612203750958, lng: 29.17914354532339 },
+      },
+      {
+        id: 110,
+        name: "Çekmeköy",
+        location: { lat: 41.0145600056959, lng: 29.188678444881006 },
+      },
+      {
+        id: 111,
+        name: "Meclis",
+        location: { lat: 41.00973677749551, lng: 29.198820935650925 },
+      },
+      {
+        id: 112,
+        name: "Sarıgazi",
+        location: { lat: 41.01039263717001, lng: 29.211872699654798 },
+      },
+      {
+        id: 113,
+        name: "Sancaktepe Şehir Hastanesi",
+        location: { lat: 41.002247831957405, lng: 29.216851513721647 },
+      },
+      {
+        id: 114,
+        name: "Samandıra Merkez",
+        location: { lat: 40.9834064224927, lng: 29.230997408646925 },
+      },
     ],
   },
 ];

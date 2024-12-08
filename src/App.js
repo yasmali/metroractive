@@ -3,6 +3,7 @@ import Map from "./components/Map";
 import FeedbackModal from "./components/FeedbackModal";
 import DonateModal from "./components/DonateModal";
 import PlaceSearchModal from "./components/PlaceSearchModal";
+import PlaceFinderModal from "./components/PlaceFinderModal";
 import Logo from "./assets/durak360-logo.svg";
 import SocialLinksModal from "./components/SocialLinksModal";
 import "./App.css";
@@ -12,6 +13,7 @@ function App() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [isPlaceSearchOpen, setIsPlaceSearchOpen] = useState(false);
+  const [isPlaceFinderOpen, setIsPlaceFinderOpen] = useState(false);
   const [selectedStation, setSelectedStation] = useState(null);
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
 
@@ -65,6 +67,36 @@ function App() {
           }}
         >
           <button
+            onClick={() => setIsPlaceSearchOpen(true)}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#FFC107",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              fontSize: "16px",
+            }}
+          >
+            Rota Oluştur
+          </button>
+          <button
+            onClick={() => setIsPlaceFinderOpen(true)} // Yeni buton
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#6C63FF",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+              fontSize: "16px",
+            }}
+          >
+            Yer Ara
+          </button>
+          <button
             onClick={() => setIsFeedbackOpen(true)}
             style={{
               padding: "8px 16px",
@@ -94,21 +126,6 @@ function App() {
           >
             Donate Me
           </button>
-          <button
-            onClick={() => setIsPlaceSearchOpen(true)}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#FFC107",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-              fontSize: "16px",
-            }}
-          >
-            Yer Ara
-          </button>
         </div>
       </div>
       {/* Map ve Diğer İçerikler */}
@@ -121,6 +138,9 @@ function App() {
         placeB={placeB} // Hedef durağı
         route={route} // Güzergah bilgisi
         routeDetails={routeDetails} // Güzergah detayları
+        setRouteDetails={setRouteDetails}
+        setPlaceA={setPlaceA}
+        setPlaceB={setPlaceB}
       />
       {isFeedbackOpen && (
         <FeedbackModal onClose={() => setIsFeedbackOpen(false)} />
@@ -139,6 +159,9 @@ function App() {
           setRoute={setRoute} // Burada gönderiliyor
           setRouteDetails={setRouteDetails} // Detaylar için prop
         />
+      )}
+      {isPlaceFinderOpen && (
+        <PlaceFinderModal onClose={() => setIsPlaceFinderOpen(false)} />
       )}
       {isSocialModalOpen && (
         <SocialLinksModal onClose={() => setIsSocialModalOpen(false)} />

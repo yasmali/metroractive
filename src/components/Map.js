@@ -13,7 +13,7 @@ import MapStyle from "../mapStyle.js";
 // Harita stil ayarları
 const mapContainerStyle = {
   width: "100%",
-  height: "90vh",
+  height: "94vh",
   borderRadius: "15px",
   boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
 };

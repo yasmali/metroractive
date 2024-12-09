@@ -596,13 +596,20 @@ export default function Map({
             border: "1px solid #ccc",
             background: "white",
             fontSize: "15px",
+            maxWidth: "280px", // Select genişliği
           }}
           value={selectedLine ? selectedLine.id : ""}
         >
           <option value="">Hat Seçiniz</option>
           {MetroLines.map((line) => (
-            <option key={line.id} value={line.id}>
-              {line.name}
+            <option
+              key={line.id}
+              value={line.id}
+              title={line.name} // Uzun metinler için tooltip
+            >
+              {line.name.length > 26
+                ? `${line.name.substring(0, 24)}..` // Uzun metinleri kes
+                : line.name}
             </option>
           ))}
         </select>
@@ -611,7 +618,7 @@ export default function Map({
           onClick={resetMap}
           style={{
             padding: "10px 20px",
-            backgroundColor: "#007BFF",
+            backgroundColor: "#e72419",
             color: "white",
             border: "none",
             borderRadius: "5px",

@@ -119,3 +119,85 @@ input[type="number"]::-webkit-inner-spin-button {
 .modal-content-general {
   animation: fadeIn 0.4s ease-in-out !important; /* Animasyon uygulandı */
 }
+
+.custom-dropdown {
+  position: relative;
+  max-width: 280px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ffffff, #f7f9fc); /* Hafif degrade */
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+  overflow: hidden;
+}
+
+.custom-dropdown:hover {
+  border-color: #007bff;
+  box-shadow: 0 6px 10px rgba(0, 123, 255, 0.2); /* Hover'da gölge artışı */
+}
+
+.custom-dropdown .selected-item {
+  padding: 12px 15px;
+  font-size: 16px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 10px;
+  background: #ffffff;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-dropdown .selected-item:hover {
+  color: #007bff;
+  background: #f8f9fa;
+}
+
+.custom-dropdown .dropdown-options {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  max-height: 280px; /* Çok fazla seçenek varsa kaydırma çubuğu */
+  overflow-y: auto;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.custom-dropdown .dropdown-option {
+  padding: 12px 15px;
+  font-size: 15px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.custom-dropdown .dropdown-option:hover {
+  background: #007bff;
+  color: white;
+}
+
+.custom-dropdown .dropdown-option:active {
+  background: #0056b3;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

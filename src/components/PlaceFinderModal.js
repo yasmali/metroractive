@@ -148,23 +148,34 @@ export default function PlaceFinderModal({ onClose }) {
           Bir yer seçin ve en yakın metro istasyonlarını öğrenin.
         </p>
 
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Bir yer arayın..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "12px",
-            marginBottom: "15px",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            fontSize: "16px",
-            boxSizing: "border-box",
-            outline: "none",
-          }}
-        />
+        <div className="input-container">
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Bir yer arayın..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginBottom: "15px",
+              border: "1px solid #ddd",
+              borderRadius: "10px",
+              fontSize: "16px",
+              boxSizing: "border-box",
+              outline: "none",
+            }}
+          />
+          {searchInput && (
+            <button
+              className="clear-btn"
+              onClick={() => setSearchInput("")}
+              aria-label="Temizle"
+            >
+              ✖
+            </button>
+          )}
+        </div>
 
         {isLoading && <p>En yakın istasyonlar hesaplanıyor...</p>}
         {!isLoading && nearestStations.length > 0 && (

@@ -12,6 +12,8 @@ export default function PlaceSearchModal({
   const [nearestStationsA, setNearestStationsA] = useState([]);
   const [nearestStationsB, setNearestStationsB] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchStationA, setSearchStationA] = useState("");
+  const [searchStationB, setSearchStationB] = useState("");
 
   const inputARef = useRef(null);
   const inputBRef = useRef(null);
@@ -26,6 +28,44 @@ export default function PlaceSearchModal({
   };
 
   useEffect(() => {
+    const savedPlaceA = sessionStorage.getItem("placeA");
+    const savedPlaceB = sessionStorage.getItem("placeB");
+    if (savedPlaceA) {
+      const parsedPlaceA = JSON.parse(savedPlaceA);
+
+      // Eğer location düz bir obje ise fonksiyonlara dönüştür
+      if (parsedPlaceA.geometry && parsedPlaceA.geometry.location) {
+        const location = parsedPlaceA.geometry.location;
+        parsedPlaceA.geometry.location = {
+          lat: () => location.lat,
+          lng: () => location.lng,
+        };
+      }
+
+      setPlaceA(parsedPlaceA);
+      inputARef.current.value = parsedPlaceA.name; // Input alanına set et
+      findNearestStations(parsedPlaceA, setNearestStationsA);
+      setSearchStationA(parsedPlaceA.name);
+    }
+
+    if (savedPlaceB) {
+      const parsedPlaceB = JSON.parse(savedPlaceB);
+
+      // Eğer location düz bir obje ise fonksiyonlara dönüştür
+      if (parsedPlaceB.geometry && parsedPlaceB.geometry.location) {
+        const location = parsedPlaceB.geometry.location;
+        parsedPlaceB.geometry.location = {
+          lat: () => location.lat,
+          lng: () => location.lng,
+        };
+      }
+
+      setPlaceB(parsedPlaceB);
+      inputBRef.current.value = parsedPlaceB.name; // Input alanına set et
+      findNearestStations(parsedPlaceB, setNearestStationsB);
+      setSearchStationB(parsedPlaceB.name);
+    }
+
     const loadAutocomplete = () => {
       autocompleteARef.current = new window.google.maps.places.Autocomplete(
         inputARef.current,
@@ -38,7 +78,9 @@ export default function PlaceSearchModal({
       autocompleteARef.current.addListener("place_changed", () => {
         const selectedPlace = autocompleteARef.current.getPlace();
         setPlaceA(selectedPlace);
+        sessionStorage.setItem("placeA", JSON.stringify(selectedPlace));
         findNearestStations(selectedPlace, setNearestStationsA);
+        setSearchStationA(selectedPlace.name);
       });
 
       autocompleteBRef.current = new window.google.maps.places.Autocomplete(
@@ -52,7 +94,9 @@ export default function PlaceSearchModal({
       autocompleteBRef.current.addListener("place_changed", () => {
         const selectedPlace = autocompleteBRef.current.getPlace();
         setPlaceB(selectedPlace);
+        sessionStorage.setItem("placeB", JSON.stringify(selectedPlace)); // Session'a kaydet
         findNearestStations(selectedPlace, setNearestStationsB);
+        setSearchStationB(selectedPlace.name);
       });
     };
 
@@ -132,8 +176,12 @@ export default function PlaceSearchModal({
     setPlaceB(null);
     setNearestStationsA([]);
     setNearestStationsB([]);
+    sessionStorage.removeItem("placeA");
+    sessionStorage.removeItem("placeB");
     if (inputARef.current) inputARef.current.value = "";
     if (inputBRef.current) inputBRef.current.value = "";
+    setSearchStationA("");
+    setSearchStationB("");
   };
 
   return (
@@ -179,36 +227,64 @@ export default function PlaceSearchModal({
           ve bir güzergah oluşturun.
         </p>
 
-        <input
-          ref={inputARef}
-          type="text"
-          placeholder="Başlangıç noktası"
-          style={{
-            width: "100%",
-            padding: "12px",
-            marginBottom: "15px",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            fontSize: "16px",
-            boxSizing: "border-box",
-            outline: "none",
-          }}
-        />
-        <input
-          ref={inputBRef}
-          type="text"
-          placeholder="Hedef noktası"
-          style={{
-            width: "100%",
-            padding: "12px",
-            marginBottom: "20px",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            fontSize: "16px",
-            boxSizing: "border-box",
-            outline: "none",
-          }}
-        />
+        <div className="input-container">
+          <input
+            ref={inputARef}
+            type="text"
+            placeholder="Başlangıç noktası"
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginBottom: "15px",
+              border: "1px solid #ddd",
+              borderRadius: "10px",
+              fontSize: "16px",
+              boxSizing: "border-box",
+              outline: "none",
+            }}
+          />
+          {searchStationA && (
+            <button
+              className="clear-btn"
+              onClick={() => {
+                setSearchStationA("");
+                inputARef.current.value = "";
+              }}
+              aria-label="Temizle"
+            >
+              ✖
+            </button>
+          )}
+        </div>
+        <div className="input-container">
+          <input
+            ref={inputBRef}
+            type="text"
+            placeholder="Hedef noktası"
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginBottom: "20px",
+              border: "1px solid #ddd",
+              borderRadius: "10px",
+              fontSize: "16px",
+              boxSizing: "border-box",
+              outline: "none",
+            }}
+          />
+          {searchStationB && (
+            <button
+              className="clear-btn"
+              onClick={() => {
+                setSearchStationB("");
+                inputBRef.current.value = "";
+              }}
+              aria-label="Temizle"
+            >
+              ✖
+            </button>
+          )}
+        </div>
 
         <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
           <button

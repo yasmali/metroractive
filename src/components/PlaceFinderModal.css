@@ -168,3 +168,49 @@
     opacity: 1;
   }
 }
+
+.input-container {
+  position: relative;
+  width: 100%;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 12px 40px 12px 12px; /* Sağda X için boşluk */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-container input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+}
+
+.input-container .clear-btn {
+  position: absolute;
+  top: 40%; /* Tam dikey hizalama */
+  right: 12px; /* Sağdan boşluk */
+  transform: translateY(-50%); /* Dikey ortalama */
+  background: none;
+  border: none;
+  font-size: 18px; /* Daha büyük boyut */
+  color: #888;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  outline: none;
+  transition: color 0.3s ease, transform 0.2s ease;
+  z-index: 2;
+}
+
+.input-container .clear-btn:hover {
+  color: #007bff; /* Hover efekti */
+}
+
+.input-container .clear-btn:active {
+  color: #0056b3;
+}
